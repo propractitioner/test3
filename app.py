@@ -45,7 +45,33 @@ if st.button('데이터 새로고침'):
     if not valid_temperatures:
         st.error("No valid temperature data available.")
     else:
-        # 지도 그리기 코드...
+        # 지도 그리기
+        fig, ax = plt.subplots(figsize=(12, 8))
+        korea_japan.plot(ax=ax, color='lightgrey', edgecolor='black')
+        
+        # 온도 범위 설정
+        temp_min = min(valid_temperatures.values())
+        temp_max = max(valid_temperatures.values())
+        temp_range = max(abs(temp_min - 15), abs(temp_max - 15))
+        vmin, vmax = 15 - temp_range, 15 + temp_range
+        
+        for city, temp in valid_temperatures.items():
+            # 여기서는 도시의 좌표를 수동으로 지정해야 합니다.
+            # 실제 구현시에는 정확한 좌표 데이터가 필요합니다.
+            x, y = 0, 0  # 각 도시의 실제 좌표로 대체해야 함
+            color = cmap((temp - vmin) / (vmax - vmin))
+            ax.plot(x, y, 'o', color=color, markersize=10)
+            ax.annotate(f"{city}: {temp:.1f}°C", xy=(x, y), xytext=(3, 3), 
+                        textcoords="offset points", fontsize=8, 
+                        bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.7))
+        
+        # Colorbar 추가
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax, orientation='vertical', label='Temperature (°C)')
+        
+        plt.title('한국과 일본의 실시간 기온')
+        st.pyplot(fig)
 
-    # 표 형태로도 데이터 표시
+    # 표 형태로도 데이터 표시 (이 줄은 if-else 블록 바깥에 있어야 함)
     st.write(temperatures)
