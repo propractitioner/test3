@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -6,6 +5,7 @@ from pyowm import OWM
 from pyowm.utils.config import get_default_config
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
+import os
 
 # OpenWeatherMap API 설정
 config_dict = get_default_config()
@@ -34,7 +34,26 @@ def get_temperatures():
                 temperatures[city] = None
     return temperatures
 
+# 지리 데이터 로드
+@st.cache_data
+def load_geo_data():
+    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    korea_japan = world[(world.name == 'South Korea') | (world.name == 'Japan')]
+    return korea_japan
+
+# 지리 데이터 로드
+korea_japan = load_geo_data()
+
+
+# 사용자 정의 colormap 생성
+colors = ['darkblue', 'blue', 'lightblue', 'white', 'pink', 'red', 'darkred']
+n_bins = 100
+cmap = LinearSegmentedColormap.from_list('temp_cmap', colors, N=n_bins)
+
 # 나머지 코드는 그대로 유지...
+
+# Streamlit 앱
+st.title('한국과 일본의 실시간 기온 분포')
 
 if st.button('데이터 새로고침'):
     temperatures = get_temperatures()
@@ -73,5 +92,5 @@ if st.button('데이터 새로고침'):
         plt.title('한국과 일본의 실시간 기온')
         st.pyplot(fig)
 
-    # 표 형태로도 데이터 표시 (이 줄은 if-else 블록 바깥에 있어야 함)
+    # 표 형태로도 데이터 표시
     st.write(temperatures)
